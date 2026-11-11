@@ -1,0 +1,1 @@
+{"name":"TinyWorkshop.Editor","rootNamespace":"TinyWorkshop.Editor","references":["TinyWorkshop.Runtime","TinyWorkshop.QuestCore","Unity.InputSystem","Unity.ugui","Unity.RenderPipelines.Universal.Runtime","Unity.RenderPipelines.Universal.2D.Runtime"],"includePlatforms":["Editor"]}
