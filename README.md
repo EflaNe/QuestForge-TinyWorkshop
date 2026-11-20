@@ -1,6 +1,6 @@
 # QuestForge · Tiny Workshop
 
-**EBLG443 Tasarım Kalıpları · Dönem Projesi**
+**Dönem Projesi**
 Arif Efe Ekinci · Öğrenci No: 20246000032 · Nişantaşı Üniversitesi
 
 Modüler oyun görev ve ilerleme sistemi (**QuestForge**) ve onu kullanan Unity 6 demosu (**Tiny Workshop**).
