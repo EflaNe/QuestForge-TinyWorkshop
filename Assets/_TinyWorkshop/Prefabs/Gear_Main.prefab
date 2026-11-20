@@ -195,7 +195,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: TinyWorkshop.Runtime::TinyWorkshop.Gear
   session: {fileID: 0}
   magnetRange: 1.15
+  magnetSpeed: 9
+  magnetDelay: 0.45
   unreachableAbove: 0.2
+  playArea:
+    serializedVersion: 2
+    x: -9.65
+    y: -5.1
+    width: 19.3
+    height: 10.5
+  labLifetime: 20
 --- !u!1 &8622012542512674522
 GameObject:
   m_ObjectHideFlags: 0

@@ -126,6 +126,9 @@ GameObject:
   - component: {fileID: 120335109581375595}
   - component: {fileID: 7107633194305776455}
   - component: {fileID: 2416676280923409999}
+  - component: {fileID: 4219016270557014271}
+  - component: {fileID: 2473335254799812999}
+  - component: {fileID: 377551485986485851}
   m_Layer: 10
   m_Name: Robot_Main
   m_TagString: Untagged
@@ -226,22 +229,58 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1ae17bf498f3594293aac7c44da11d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: TinyWorkshop.Runtime::TinyWorkshop.RobotController2D
-  profiles:
-  - {fileID: 11400000, guid: 6e940fff6b0a0024f8146e8d4e4dd7a4, type: 2}
-  - {fileID: 11400000, guid: 906f7e90b9ba3dd44b28deb9bf32c16f, type: 2}
-  - {fileID: 11400000, guid: 635155c21ceeb844c98d998899f9eeea, type: 2}
-  visual: {fileID: 6969859963452735451}
-  session: {fileID: 0}
+  profile: {fileID: 11400000, guid: 6e940fff6b0a0024f8146e8d4e4dd7a4, type: 2}
   groundMask:
     serializedVersion: 2
     m_Bits: 256
+  fallLimit: -5.3
   assistance: 1
-  carrySprite: {fileID: 21300000, guid: eeea8b44fc9b060479f3adec2d71cd83, type: 3}
-  carryOffset: {x: 0.42, y: 0.5}
-  carryScale: 0.7
-  animator: {fileID: 3301141904099499668}
+--- !u!114 &4219016270557014271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 829662736030607810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 159c912de9b4f7b47abba397e0024bbc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TinyWorkshop.Runtime::TinyWorkshop.RobotInput
+--- !u!114 &2473335254799812999
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 829662736030607810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8df722d38ba5a404aafedc8962f7d142, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TinyWorkshop.Runtime::TinyWorkshop.RobotPresentation
+  feedback: {fileID: 0}
+  visual: {fileID: 6969859963452735451}
   bodySprite: {fileID: 7055655706343751079}
+  animator: {fileID: 3301141904099499668}
   emote: {fileID: 5460721081041225248}
+--- !u!114 &377551485986485851
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 829662736030607810}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ba8fe36fd868304980da1bc58d49275, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TinyWorkshop.Runtime::TinyWorkshop.RobotCarryStack
+  session: {fileID: 0}
+  anchor: {fileID: 6969859963452735451}
+  gearSprite: {fileID: 21300000, guid: eeea8b44fc9b060479f3adec2d71cd83, type: 3}
+  offset: {x: 0.42, y: 0.5}
+  scale: 0.7
 --- !u!1 &7427725437393298222
 GameObject:
   m_ObjectHideFlags: 0

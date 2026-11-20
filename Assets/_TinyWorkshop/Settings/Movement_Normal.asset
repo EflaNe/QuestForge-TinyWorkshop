@@ -17,7 +17,7 @@ MonoBehaviour:
   braking: 65
   jumpSpeed: 10.5
   gravity: 3.5
+  fallMultiplier: 1.4
+  jumpCut: 0.5
   coyoteTime: 0.12
   jumpBuffer: 0.12
-  jumpCut: 0.5
-  fallMultiplier: 1.4

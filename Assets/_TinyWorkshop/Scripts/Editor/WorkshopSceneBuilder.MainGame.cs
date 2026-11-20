@@ -61,69 +61,57 @@ namespace TinyWorkshop.Editor
             var collider = robot.AddComponent<CapsuleCollider2D>();
             collider.size = new Vector2(.56f, .88f);
             collider.sharedMaterial = robotPhysics;
-            var controller = robot.AddComponent<RobotController2D>();
+            // Movement, input, look and carried-gear stack are separate components.
+            robot.AddComponent<RobotController2D>().SetProfile(movement[0]);
+            robot.AddComponent<RobotInput>();
             var visual = MainSpriteRenderer("Visual", "robot_idle_0", new Vector2(0, -.44f), 10, robot.transform);
-            controller.visual = visual.transform;
-            controller.bodySprite = visual;
-            controller.animator = Animated(visual.gameObject, robotController);
-            controller.profiles = movement;
-            controller.carrySprite = MainSprite("gear_part");
-            controller.carryOffset = new Vector2(.42f, .5f);
-            controller.carryScale = .7f;
-            controller.emote = MainSpriteRenderer("HeartBubble", "bubble_heart", new Vector2(.62f, 1.3f), 12, robot.transform);
-            controller.emote.transform.localScale = Vector3.one * .8f;
+            var robotLook = robot.AddComponent<RobotPresentation>();
+            robotLook.visual = visual.transform;
+            robotLook.bodySprite = visual;
+            robotLook.animator = Animated(visual.gameObject, robotController);
+            robotLook.emote = MainSpriteRenderer("HeartBubble", "bubble_heart", new Vector2(.62f, 1.3f), 12, robot.transform);
+            robotLook.emote.transform.localScale = Vector3.one * .8f;
+            var stack = robot.AddComponent<RobotCarryStack>();
+            stack.anchor = visual.transform;
+            stack.gearSprite = MainSprite("gear_part");
+            stack.offset = new Vector2(.42f, .5f);
+            stack.scale = .7f;
             robotMainPrefab = PrefabUtility.SaveAsPrefabAsset(robot, Root + "Prefabs/Robot_Main.prefab");
             UnityEngine.Object.DestroyImmediate(robot);
 
-            // Gear (silver part, settles on platforms)
-            var gear = new GameObject("Gear_Main");
-            gear.layer = 9;
-            var gearBody = gear.AddComponent<Rigidbody2D>();
-            gearBody.gravityScale = 2.2f;
-            gearBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
-            gearBody.interpolation = RigidbodyInterpolation2D.Interpolate;
-            var circle = gear.AddComponent<CircleCollider2D>();
-            circle.radius = .29f;
-            circle.sharedMaterial = gearPhysics;
-            var gearComponent = gear.AddComponent<Gear>();
-            gearComponent.unreachableAbove = .2f;
-            MainSpriteRenderer("Visual", "gear_part", Vector2.zero, 8, gear.transform);
-            var pickup = new GameObject("PickupTrigger");
-            pickup.layer = 11;
-            pickup.transform.SetParent(gear.transform, false);
-            pickup.AddComponent<CircleCollider2D>().isTrigger = true;
-            pickup.GetComponent<CircleCollider2D>().radius = .5f;
-            pickup.AddComponent<GearPickup>().gear = gearComponent;
-            gearMainPrefab = PrefabUtility.SaveAsPrefabAsset(gear, Root + "Prefabs/Gear_Main.prefab").GetComponent<Gear>();
-            UnityEngine.Object.DestroyImmediate(gear);
+            // Gear (silver part): main game settles on platforms; labs use a prototype-sized collider.
+            gearMainPrefab = GearPrefab("Gear_Main", .29f, .5f, .2f, 1);
+            gearLabPrefab = GearPrefab("Gear_Lab", .25f, .44f, -.25f, .86f);
 
             // Production machine: animated body, separate red cap, charge-lamp glows, ready sparks.
             var machine = new GameObject("WorkshopMachine_Main");
+            // Rules, input and look are separate components.
             var comp = machine.AddComponent<WorkshopMachine>();
-            comp.profiles = production;
+            comp.SetProfile(production[0]);
+            var input = machine.AddComponent<MachineInput>();
+            var look = machine.AddComponent<MachinePresentation>();
             var machineBody = MainSpriteRenderer("Body", "machine_0", Vector2.zero, 3, machine.transform);
             Animated(machineBody.gameObject, machineController);
-            comp.bodyVisual = machineBody.transform;
-            comp.pressGlow = MainSpriteRenderer("PressGlow", "soft_glow", layout.machineCap.V + new Vector2(0, .3f), 4, machine.transform);
-            comp.pressGlow.transform.localScale = Vector3.one * 1.5f;
-            comp.pressGlow.color = Color.clear;
-            comp.buttonVisual = MainSpriteRenderer("RedButton", "machine_cap", layout.machineCap.V, 5, machine.transform).transform;
-            comp.pressDepth = .08f;
-            comp.readySpark = MainSpriteRenderer("ReadySpark", "machine_spark", layout.machineSpark.V, 6, machine.transform);
-            comp.glowLights = true;
-            comp.glowColors = new[] { new Color(.5f, 1, .45f), new Color(1, .9f, .35f), new Color(1, .45f, .35f) };
-            comp.chargeLights = new SpriteRenderer[3];
+            look.bodyVisual = machineBody.transform;
+            look.pressGlow = MainSpriteRenderer("PressGlow", "soft_glow", layout.machineCap.V + new Vector2(0, .3f), 4, machine.transform);
+            look.pressGlow.transform.localScale = Vector3.one * 1.5f;
+            look.pressGlow.color = Color.clear;
+            look.buttonVisual = MainSpriteRenderer("RedButton", "machine_cap", layout.machineCap.V, 5, machine.transform).transform;
+            look.pressDepth = .08f;
+            look.readySpark = MainSpriteRenderer("ReadySpark", "machine_spark", layout.machineSpark.V, 6, machine.transform);
+            look.glowColors = new[] { new Color(.5f, 1, .45f), new Color(1, .9f, .35f), new Color(1, .45f, .35f) };
+            look.chargeLights = new SpriteRenderer[3];
             for (int i = 0; i < 3; i++)
             {
-                comp.chargeLights[i] = MainSpriteRenderer("ChargeGlow_" + i, "soft_glow", layout.machineLamps[i].V, 6, machine.transform);
-                comp.chargeLights[i].transform.localScale = Vector3.one * .6f;
-                comp.chargeLights[i].color = Color.clear;
+                look.chargeLights[i] = MainSpriteRenderer("ChargeGlow_" + i, "soft_glow", layout.machineLamps[i].V, 6, machine.transform);
+                look.chargeLights[i].transform.localScale = Vector3.one * .6f;
+                look.chargeLights[i].color = Color.clear;
             }
             var click = machine.AddComponent<BoxCollider2D>();
             click.size = new Vector2(layout.machineSize.x * .92f, 3.7f);
             click.offset = new Vector2(0, 1.85f);
             click.isTrigger = true;
-            comp.clickArea = click;
+            input.clickArea = click;
             comp.interactionRange = 2.6f;
             comp.outlet = new GameObject("GearOutlet").transform;
             comp.outlet.SetParent(machine.transform, false);
@@ -132,8 +120,34 @@ namespace TinyWorkshop.Editor
             machineMainPrefab = PrefabUtility.SaveAsPrefabAsset(machine, Root + "Prefabs/WorkshopMachine_Main.prefab");
             UnityEngine.Object.DestroyImmediate(machine);
             terminalAnimator = terminalController;
+            machineAnimator = machineController;
         }
-        static AnimatorController terminalAnimator;
+        static AnimatorController terminalAnimator, machineAnimator;
+        static Gear gearLabPrefab;
+        static Gear GearPrefab(string name, float radius, float pickupRadius, float unreachableAbove, float visualScale)
+        {
+            var gear = new GameObject(name);
+            gear.layer = 9;
+            var gearBody = gear.AddComponent<Rigidbody2D>();
+            gearBody.gravityScale = 2.2f;
+            gearBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            gearBody.interpolation = RigidbodyInterpolation2D.Interpolate;
+            var circle = gear.AddComponent<CircleCollider2D>();
+            circle.radius = radius;
+            circle.sharedMaterial = gearPhysics;
+            var component = gear.AddComponent<Gear>();
+            component.unreachableAbove = unreachableAbove;
+            MainSpriteRenderer("Visual", "gear_part", Vector2.zero, 8, gear.transform).transform.localScale = Vector3.one * visualScale;
+            var pickup = new GameObject("PickupTrigger");
+            pickup.layer = 11;
+            pickup.transform.SetParent(gear.transform, false);
+            pickup.AddComponent<CircleCollider2D>().isTrigger = true;
+            pickup.GetComponent<CircleCollider2D>().radius = pickupRadius;
+            pickup.AddComponent<GearPickup>().gear = component;
+            var prefab = PrefabUtility.SaveAsPrefabAsset(gear, Root + "Prefabs/" + name + ".prefab").GetComponent<Gear>();
+            UnityEngine.Object.DestroyImmediate(gear);
+            return prefab;
+        }
 
         static SpriteRenderer MainSpriteRenderer(string name, string sprite, Vector2 position, int order, Transform parent = null)
         {
@@ -218,68 +232,13 @@ namespace TinyWorkshop.Editor
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             float floor = layout.floorTopY;
-            var session = new GameObject("WorkshopSession").AddComponent<WorkshopSession>();
-            session.mode = WorkshopMode.MainGame;
-            session.gearPrefab = gearMainPrefab;
-            var camera = new GameObject("Main Camera").AddComponent<Camera>();
-            camera.tag = "MainCamera";
-            camera.orthographic = true;
-            camera.orthographicSize = 5.625f;
-            camera.transform.position = new Vector3(0, 0, -10);
-            camera.backgroundColor = new Color(.16f, .33f, .32f);
-            camera.clearFlags = CameraClearFlags.SolidColor;
-            camera.gameObject.AddComponent<AudioListener>();
-            session.worldCamera = camera;
-            new GameObject("Workshop Light").AddComponent<Light>().type = LightType.Directional;
-
-            var world = new GameObject("World").transform;
-            var backdrop = MainSpriteRenderer("WorkshopBackdrop", "backdrop", Vector2.zero, -20, world);
-            backdrop.transform.localScale = new Vector3(1, 11.25f / backdrop.sprite.bounds.size.y, 1);
-
-            session.Feedback = new GameObject("Feedback").AddComponent<WorkshopFeedback>();
-            session.Feedback.profile = feedback;
-            session.Feedback.worldCamera = camera;
-            session.Feedback.sparkSprite = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "Art/spark.png");
-            session.Feedback.puffSprite = MainSprite("soft_glow");
-            session.Feedback.clips = Directory.GetFiles(Root + "Audio", "*.wav").Select(p => AssetDatabase.LoadAssetAtPath<AudioClip>(p.Replace('\\', '/'))).Where(c => c.name != "music" && c.name != "ambience").ToArray();
-            session.Feedback.musicClip = AssetDatabase.LoadAssetAtPath<AudioClip>(Root + "Audio/music.wav");
-            session.Feedback.ambienceClip = AssetDatabase.LoadAssetAtPath<AudioClip>(Root + "Audio/ambience.wav");
-
-            // Painted ceiling lamps get a warm bulb + cone glow that brighten when the workshop wakes up.
-            var lights = new GameObject("LampGlows").transform;
-            lights.SetParent(world, false);
-            session.lamps = new SpriteRenderer[3];
-            session.lampGlows = new SpriteRenderer[3];
-            for (int i = 0; i < 3; i++)
-            {
-                var at = layout.lamps[i].V;
-                session.lamps[i] = MainSpriteRenderer("Bulb_" + i, "soft_glow", at, -5, lights);
-                session.lamps[i].transform.localScale = Vector3.one * .9f;
-                session.lamps[i].color = new Color(1, .86f, .55f, .12f);
-                session.lampGlows[i] = MainSpriteRenderer("Cone_" + i, "soft_glow", at + new Vector2(0, -1.9f), -4, lights);
-                session.lampGlows[i].transform.localScale = new Vector3(3.2f, 4.2f, 1);
-                session.lampGlows[i].color = new Color(1, .78f, .4f, .05f);
-            }
-
-            var level = new GameObject("Level").transform;
-            level.SetParent(world, false);
-            Ground("LeftWall", new Vector2(-9.8f, 0), new Vector2(.3f, 20), false);
-            Ground("RightWall", new Vector2(9.8f, 0), new Vector2(.3f, 20), false);
-            Ground("Floor", new Vector2(0, floor - 1), new Vector2(20, 2), false);
+            var session = BeginPaintedScene(WorkshopMode.MainGame, gearMainPrefab, out var level);
             string[] names = { "LowPlatform", "MiddlePlatform", "RightPlatform" };
             var drops = new Vector2[3];
             for (int i = 0; i < 3; i++)
             {
                 var p = MainPlatforms[i];
-                float top = floor + p.y;
-                var go = new GameObject(names[i]);
-                go.layer = 8;
-                go.transform.SetParent(level, false);
-                go.transform.position = new Vector2(p.x, top - .225f);
-                go.AddComponent<BoxCollider2D>().size = new Vector2(p.z, .45f);
-                var sr = MainSpriteRenderer("Platform", "platform", new Vector2(0, .225f + .02f), 1, go.transform);
-                sr.drawMode = SpriteDrawMode.Sliced;
-                sr.size = new Vector2(p.z + .06f, layout.platformSize.y);
+                Ground(names[i], new Vector2(p.x, floor + p.y - .225f), new Vector2(p.z, .45f), true, level);
             }
             // Launch order: low, right, middle -> the player has to climb for the last one.
             drops[0] = new Vector2(MainPlatforms[0].x, floor + MainPlatforms[0].y + .31f);
@@ -287,13 +246,8 @@ namespace TinyWorkshop.Editor
             drops[2] = new Vector2(MainPlatforms[1].x, floor + MainPlatforms[1].y + .31f);
             session.gearDrops = drops;
             session.safeGearPoint = new Vector2(5.3f, floor + .4f);
-            foreach (var n in new[] { "LeftWall", "RightWall", "Floor" })
-                GameObject.Find(n).transform.SetParent(level, true);
 
-            var machine = (GameObject)PrefabUtility.InstantiatePrefab(machineMainPrefab);
-            machine.transform.position = new Vector3(-5.29f, floor);
-            session.Machine = machine.GetComponent<WorkshopMachine>();
-            session.Machine.session = session;
+            PlaceMachine(session, new Vector3(-5.29f, floor));
 
             var station = MainSpriteRenderer("DeliveryTerminal", "terminal_0", new Vector2(6.81f, floor), 3).gameObject;
             Animated(station, terminalAnimator);
@@ -304,10 +258,7 @@ namespace TinyWorkshop.Editor
             session.Station.callout.transform.localScale = Vector3.one * .55f;
             session.Station.confirm = MainSpriteRenderer("DeliveredCheck", "node_done", new Vector2(-.2f, 3.3f), 9, station.transform);
 
-            var robot = (GameObject)PrefabUtility.InstantiatePrefab(robotMainPrefab);
-            robot.transform.position = new Vector3(-8.6f, floor + .46f);
-            session.Robot = robot.GetComponent<RobotController2D>();
-            session.Robot.session = session;
+            PlaceRobot(session, new Vector3(-8.6f, floor + .46f));
 
             BuildHud(session);
             EditorSceneManager.SaveScene(scene, Root + "Scenes/04_MainGame.unity");
@@ -442,28 +393,8 @@ namespace TinyWorkshop.Editor
             Clickable(gearPlus, hud.OpenMissions, false);
 
             // Bottom bar: title, control chips, menu buttons.
-            var bar = Img("BottomBar", root, "bottom_bar", Vector2.zero, Vector2.zero, 1.75f).rectTransform;
-            bar.anchorMin = new Vector2(0, 0);
-            bar.anchorMax = new Vector2(1, 0);
-            bar.pivot = new Vector2(.5f, 0);
-            bar.anchoredPosition = new Vector2(0, 4);
-            bar.sizeDelta = new Vector2(-12, 72);
-            var left = Anchored(Rect("Left", bar, new Vector2(0, 36), new Vector2(10, 10)), new Vector2(0, 0), new Vector2(0, .5f));
-            Img("Logo", left, "logo_gear", new Vector2(30, 0), new Vector2(40, 40));
-            var brand = T("Brand", left, new Vector2(56, 1), new Vector2(200, 40), 25, White, TextAnchor.MiddleLeft, true, true);
-            brand.rectTransform.pivot = new Vector2(0, .5f);
-            brand.text = "Tiny Workshop";
-            var divider = Panel("Divider", left, new Vector2(262, 0), new Vector2(3, 36), new Color(.42f, .7f, .64f, .8f));
-            float x = 284;
-            x = Chip(left, x, new[] { "mouse" }, "Tıkla: Üret");
-            x = Chip(left, x, new[] { "A", "D" }, "Hareket");
-            x = Chip(left, x, new[] { "SPACE" }, "Zıpla");
-            x = Chip(left, x, new[] { "E" }, "Etkileşim");
-            Chip(left, x, new[] { "TAB" }, "Menü");
-            var right = Anchored(Rect("Menu", bar, new Vector2(0, 36), new Vector2(10, 10)), new Vector2(1, 0), new Vector2(1, .5f));
-            (string sprite, UnityAction action)[] menu = { ("btn_home", hud.OpenHome), ("btn_build", hud.OpenUpgrades), ("btn_box", hud.OpenMissions), ("btn_settings", hud.OpenSettings) };
-            for (int i = 0; i < menu.Length; i++)
-                Clickable(Img(menu[i].sprite.Replace("btn_", "Button_"), right, menu[i].sprite, new Vector2(-226 + i * 64, 2), new Vector2(60, 58)), menu[i].action);
+            BottomBar(root, new[] { (new[] { "mouse" }, "Tıkla: Üret"), (new[] { "A", "D" }, "Hareket"), (new[] { "SPACE" }, "Zıpla"), (new[] { "E" }, "Etkileşim"), (new[] { "TAB" }, "Menü") },
+                new (string, UnityAction)[] { ("btn_home", hud.OpenHome), ("btn_build", hud.OpenUpgrades), ("btn_box", hud.OpenMissions), ("btn_settings", hud.OpenSettings) });
 
             // World hint pill + toast.
             var hint = Img("InteractionHint", root, "stage_label", Vector2.zero, new Vector2(240, 40), 92f / 40);
@@ -511,32 +442,9 @@ namespace TinyWorkshop.Editor
             }
             T("Note", upgrades.transform, new Vector2(0, -122), new Vector2(460, 24), 15, SoftText, TextAnchor.MiddleCenter, false).text = "Geliştirme sistemi yakında açılıyor";
 
-            // Home window (house button / Tab): scenes + restart.
-            var home = Window("HomeWindow", root, "window_plain", new Vector2(430, 300), hud, new Vector2(200, 135));
-            hud.menuPanel = home;
-            T("Title", home.transform, new Vector2(0, 104), new Vector2(380, 40), 28, InkText, TextAnchor.MiddleCenter).text = "Atölye";
-            KeyButton("01 Üretim  [F1]", home.transform, new Vector2(-98, 46), new Vector2(184, 44), session.OpenProduction);
-            KeyButton("02 Hareket  [F2]", home.transform, new Vector2(98, 46), new Vector2(184, 44), session.OpenMovement);
-            KeyButton("03 Fizik  [F3]", home.transform, new Vector2(-98, -6), new Vector2(184, 44), session.OpenPhysics);
-            KeyButton("04 Atölye  [F4]", home.transform, new Vector2(98, -6), new Vector2(184, 44), session.OpenMain);
-            KeyButton("Yeniden Başla  [R]", home.transform, new Vector2(0, -74), new Vector2(380, 46), session.Restart, 18);
-
-            // Settings window (gear button).
-            var settings = Window("SettingsWindow", root, "window_plain", new Vector2(380, 250), hud, new Vector2(175, 110));
-            hud.settingsPanel = settings;
-            T("Title", settings.transform, new Vector2(0, 80), new Vector2(340, 40), 28, InkText, TextAnchor.MiddleCenter).text = "Ayarlar";
-            hud.soundLabel = KeyButton("Sound", settings.transform, new Vector2(0, 18), new Vector2(280, 46), session.Feedback.ToggleMute, 18);
-            hud.shakeLabel = KeyButton("Shake", settings.transform, new Vector2(0, -40), new Vector2(280, 46), hud.ToggleShake, 18);
-
-            // Completion window.
-            var victory = Img("Completion", root, "window_plain", new Vector2(0, 40), new Vector2(540, 230), 1.2f).gameObject;
-            victory.GetComponent<Image>().raycastTarget = true;
-            hud.victoryPanel = victory;
-            Img("Gift", victory.transform, "gift", new Vector2(0, 112), new Vector2(84, 74));
-            hud.victoryTitle = T("Title", victory.transform, new Vector2(0, 42), new Vector2(500, 44), 32, new Color(.2f, .52f, .3f), TextAnchor.MiddleCenter);
-            hud.victoryText = T("Message", victory.transform, new Vector2(0, 2), new Vector2(500, 30), 18, SoftText, TextAnchor.MiddleCenter, false);
-            KeyButton("Yeniden Oyna", victory.transform, new Vector2(0, -60), new Vector2(220, 48), session.Restart, 19);
-            victory.SetActive(false);
+            HomeWindow(session, root, hud);
+            SettingsWindow(session, root, hud);
+            CompletionWindow(session, root, hud);
         }
         // One control hint: key caps (or the mouse icon) followed by a label. Returns the next x.
         static float Chip(Transform parent, float x, string[] keys, string label)

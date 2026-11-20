@@ -132,6 +132,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7123320932090786348}
   - component: {fileID: 4290543486139416188}
+  - component: {fileID: 3402876282444208859}
+  - component: {fileID: 8979614382536029452}
   - component: {fileID: 4188548836857352899}
   m_Layer: 0
   m_Name: WorkshopMachine_Main
@@ -176,27 +178,47 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: TinyWorkshop.Runtime::TinyWorkshop.WorkshopMachine
   session: {fileID: 0}
-  profiles:
-  - {fileID: 11400000, guid: be510a3507a7b3f44ac20388ec319f09, type: 2}
-  - {fileID: 11400000, guid: c154099e2c55757479a1d0f32f10be88, type: 2}
-  - {fileID: 11400000, guid: 12caa28339da6bf41922854962a8bed7, type: 2}
+  profile: {fileID: 11400000, guid: be510a3507a7b3f44ac20388ec319f09, type: 2}
+  outlet: {fileID: 7996112364718649667}
+  interactionRange: 2.6
+--- !u!114 &3402876282444208859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1911347589294962611}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f3d9e0943aca9541acc0f97d0c5ba95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TinyWorkshop.Runtime::TinyWorkshop.MachineInput
+  clickArea: {fileID: 4188548836857352899}
+--- !u!114 &8979614382536029452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1911347589294962611}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b895d9a27f275b24f86521a9fd4ffa24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TinyWorkshop.Runtime::TinyWorkshop.MachinePresentation
   buttonVisual: {fileID: 5381563931543007551}
   bodyVisual: {fileID: 5833418162222772798}
-  outlet: {fileID: 7996112364718649667}
-  clickArea: {fileID: 4188548836857352899}
+  pressDepth: 0.08
   chargeLights:
   - {fileID: 8830141950021716747}
   - {fileID: 7933834157024751525}
   - {fileID: 3802330937538968299}
-  interactionRange: 2.6
-  glowLights: 1
   glowColors:
   - {r: 0.5, g: 1, b: 0.45, a: 1}
   - {r: 1, g: 0.9, b: 0.35, a: 1}
   - {r: 1, g: 0.45, b: 0.35, a: 1}
   readySpark: {fileID: 7743746353225365811}
   pressGlow: {fileID: 3014463825193608581}
-  pressDepth: 0.08
 --- !u!61 &4188548836857352899
 BoxCollider2D:
   m_ObjectHideFlags: 0

@@ -8,6 +8,13 @@ Dil: C# · Motor: Unity 6000.3.23f1 (URP 2D, Input System)
 
 ![Görev aktif: dişli üretiliyor](docs/screenshots/02_active_produce.png)
 
+| Doküman | İçerik |
+| --- | --- |
+| [docs/TASARIM_KALIPLARI.md](docs/TASARIM_KALIPLARI.md) | Dört kalıbın UML sınıf diyagramları, roller ve dosya yerleri, durum ve sıra diyagramları |
+| [docs/KURULUM.md](docs/KURULUM.md) | Hazır Windows sürümü, Unity Editor ve .NET ile kurulum/çalıştırma |
+| [docs/TEST.md](docs/TEST.md) | Test planı, her testin senaryosu ve son çalıştırma sonuçları (41/41 geçti) |
+| [Releases](https://github.com/EflaNe/QuestForge-TinyWorkshop/releases/latest) | Oynanabilir Windows sürümü (`TinyWorkshop-Windows64.zip`) |
+
 ---
 
 ## 1. Problem
@@ -76,13 +83,13 @@ QuestCore saf C#'tır (`noEngineReferences: true`); Unity'ye hiç referans verme
 | ConcreteObserver | `WorkshopQuest`, `Objective` |
 | Bildirim verisi | `GameEvent` (`Kind`, `PartId`) |
 
-**Neden:** Oyun nesneleri (`WorkshopMachine`, `Gear`, `RepairStation`) yalnızca `publisher.Publish(new GameEvent(...))` çağırır; görevi tanımazlar. Görev de olayı üreten nesneyi tanımaz. Sahne kapanınca `WorkshopQuest.Dispose()` abonelikten çıkar (sızıntı yok).
+**Neden:** Oyun tarafı (`WorkshopSession`) yalnızca `publisher.Publish(new GameEvent(...))` çağırır; makine, dişli ve istasyon görevi hiç tanımaz. Görev de olayı üreten nesneyi tanımaz. Sahne kapanınca `WorkshopQuest.Dispose()` abonelikten çıkar (sızıntı yok).
 
-| Oyun nesnesi | Oyuncu ne yapar | Yayınlanan olay |
-| --- | --- | --- |
-| `WorkshopMachine` | Turuncu düğmeye 3 tık | `PartProduced` |
-| `Gear` | Robot dişliye dokunur | `PartCollected` |
-| `RepairStation` | İstasyonda **E** | `PartDelivered` |
+| Oyun nesnesi | Oyuncu ne yapar | Yayınlayan metot | Olay |
+| --- | --- | --- | --- |
+| `WorkshopMachine` | Turuncu düğmeye 3 tık | `WorkshopSession.Produce` | `PartProduced` |
+| `Gear` | Robot dişliye dokunur | `WorkshopSession.TryCollect` | `PartCollected` |
+| `RepairStation` | İstasyonda **E** | `WorkshopSession.Deliver` | `PartDelivered` |
 
 ### 2.4 State (Davranışsal) · `QuestCore/State/`
 
@@ -140,6 +147,10 @@ Bağımlılık tek yönlüdür: **Gameplay → QuestCore**. QuestCore hiçbir Un
 
 ## 5. Çalıştırma
 
+Ayrıntılı kurulum: **[docs/KURULUM.md](docs/KURULUM.md)**. En hızlı yol: [Releases](https://github.com/EflaNe/QuestForge-TinyWorkshop/releases/latest) sayfasından `TinyWorkshop-Windows64.zip` indirip `TinyWorkshop.exe` çalıştırın, **F4** ile ana sahneye geçin.
+
+Editor'den:
+
 1. Projeyi Unity **6000.3.23f1** ile açın.
 2. `Assets/_TinyWorkshop/Scenes/04_MainGame.unity` sahnesini açıp **Play**'e basın.
 3. **E** ile vardiyayı başlatın → makinenin turuncu düğmesine 3 kez tıklayın → **Space** ile zıplayıp dişlilere dokunun → sağdaki istasyonda **E** ile teslim edin → tekrar **E** ile ödülü alın.
@@ -148,9 +159,11 @@ Kontroller: **A/D** veya oklar hareket · **Space** zıpla · **E** etkileşim �
 
 ## 6. Testler
 
+Ayrıntılı test dokümanı ve son sonuçlar: **[docs/TEST.md](docs/TEST.md)** · EditMode 11/11 · PlayMode 13/13 · .NET 17/17.
+
 | Paket | İçerik |
 | --- | --- |
-| `Tests/EditMode/QuestCoreTests.cs` (7 test) | `FactoriesCreateMatchingObjectiveKinds`, `InvalidTargetIsRejected` (Factory) · `EmptyCompositeIsNotACompletedQuest` (Composite) · `RepeatedEventsAdvanceEachObjectiveOnlyOnce`, `DisposeRemovesObserverAndDisablesQuest` (Observer) · `LockedQuestIgnoresEventsAndRejectsReward`, `AllObjectivesRequiredAndRewardClaimedExactlyOnce` (State) |
+| `Tests/EditMode/QuestCoreTests.cs` (7 test) + `SceneIntegrityTests.cs` (4 sahne) | `FactoriesCreateMatchingObjectiveKinds`, `InvalidTargetIsRejected` (Factory) · `EmptyCompositeIsNotACompletedQuest` (Composite) · `RepeatedEventsAdvanceEachObjectiveOnlyOnce`, `DisposeRemovesObserverAndDisablesQuest` (Observer) · `LockedQuestIgnoresEventsAndRejectsReward`, `AllObjectivesRequiredAndRewardClaimedExactlyOnce` (State) |
 | `Tests/PlayMode/GameplayTests.cs` (13 test) | Girdi, fizik ve gerçek üretim → toplama → teslim → ödül akışıyla oyunu baştan sona bitiren entegrasyon testleri |
 | `Tools/QuestCore.Checks` | Aynı QuestCore kaynağını Unity olmadan .NET 8 ile derleyip çalıştırır |
 

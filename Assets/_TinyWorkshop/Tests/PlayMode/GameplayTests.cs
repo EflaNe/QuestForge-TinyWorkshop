@@ -10,6 +10,8 @@ namespace TinyWorkshop.Tests
 {
     public sealed class GameplayTests
     {
+        // Movement course is lifted above the painted floor (WorkshopSceneBuilder.MovementLift).
+        const float Lift = .96f;
         Keyboard keyboard;
         WorkshopSession session;
         float jumpHeight;
@@ -164,15 +166,15 @@ namespace TinyWorkshop.Tests
             yield return Jump(true);
             Assert.Greater(high, jumpHeight + .25f, "Holding jump must reach higher");
             session.SelectSecond();
-            Assert.AreEqual(4.5f, session.Robot.Settings.maxSpeed);
+            Assert.AreEqual(4.5f, session.Robot.Profile.maxSpeed);
             session.SelectThird();
-            Assert.AreEqual(6.2f, session.Robot.Settings.maxSpeed);
+            Assert.AreEqual(6.2f, session.Robot.Profile.maxSpeed);
         }
         IEnumerator Jump(bool shortJump)
         {
             Keys();
             var body = session.Robot.GetComponent<Rigidbody2D>();
-            body.position = new Vector2(-8, -3.35f);
+            body.position = new Vector2(-8, -3.35f + Lift);
             body.linearVelocity = Vector2.zero;
             yield return new WaitForSeconds(.15f);
             jumpHeight = -10;
@@ -192,7 +194,7 @@ namespace TinyWorkshop.Tests
         {
             yield return Open("02_Movement");
             var body = session.Robot.GetComponent<Rigidbody2D>();
-            body.position = new Vector2(-5.08f, -3.35f);
+            body.position = new Vector2(-5.08f, -3.35f + Lift);
             body.linearVelocity = Vector2.zero;
             yield return new WaitForSeconds(.04f);
             Assert.IsFalse(session.Robot.Grounded);
@@ -205,7 +207,7 @@ namespace TinyWorkshop.Tests
         {
             yield return Open("02_Movement");
             var body = session.Robot.GetComponent<Rigidbody2D>();
-            body.position = new Vector2(-8, -2.85f);
+            body.position = new Vector2(-8, -2.85f + Lift);
             body.linearVelocity = new Vector2(0, -5);
             yield return new WaitForFixedUpdate();
             Keys(Key.Space);
@@ -251,7 +253,7 @@ namespace TinyWorkshop.Tests
         {
             yield return Open("02_Movement");
             var body = session.Robot.GetComponent<Rigidbody2D>();
-            body.position = new Vector2(-3.6f, -2.22f);
+            body.position = new Vector2(-3.6f, -2.22f + Lift);
             body.linearVelocity = new Vector2(4, 0);
             for (float t = 0; t < .08f; t += Time.deltaTime)
             {
@@ -263,7 +265,7 @@ namespace TinyWorkshop.Tests
             yield return new WaitForSeconds(.12f);
             Assert.Greater(body.position.x, -5);
             Assert.Less(body.position.x, -2);
-            Assert.Greater(body.position.y, -2.5f);
+            Assert.Greater(body.position.y, -2.5f + Lift);
         }
         [UnityTest]
         public IEnumerator MovementCourseCompletesWithNormalProfile()

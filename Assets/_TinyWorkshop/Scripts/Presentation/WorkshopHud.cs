@@ -27,8 +27,8 @@ namespace TinyWorkshop
         public Text[] missionCounts;
         public Font floaterFont;
 
-        static readonly string[] Titles = { "ÜRETİM TEZGAHI", "ROBOT PARKURU", "FİZİK LABORATUVARI", "ATÖLYEYİ UYANDIR" };
-        static readonly string[] Subtitles = { "01 / TEK TUŞ · RİTİM VE ÜRETİM", "02 / HAREKET · ÜÇ PLATFORM", "03 / FİZİK · ÇARPIŞMA VE SEKME", "04 / TINY WORKSHOP · İLK VARDİYA" };
+        static readonly string[] Titles = { "Üretim Tezgahı", "Robot Parkuru", "Fizik Laboratuvarı", "Atölyeyi Uyandır" };
+        static readonly string[] Subtitles = { "01 · Tek Tuş", "02 · Hareket", "03 · Fizik", "04 · Atölye" };
         static readonly string[] StepNames = { "Dişli üret", "Dişlileri topla", "Teslim et" };
         const string Done = "#8fd6a0", Current = "#f2b25c", Pending = "#6f8583";
         float controlsAlpha = 1, shownFill, cardPunch, coinPunch, gearPunch;
@@ -89,7 +89,7 @@ namespace TinyWorkshop
             if (subtitle)
                 subtitle.text = Subtitles[mode];
             if (soundLabel)
-                soundLabel.text = session.mode == WorkshopMode.MainGame ? (session.Feedback.Muted ? "Ses: Kapalı  [M]" : "Ses: Açık  [M]") : session.Feedback.Muted ? "SES: KAPALI [M]" : "SES: AÇIK [M]";
+                soundLabel.text = session.Feedback.Muted ? "Ses: Kapalı  [M]" : "Ses: Açık  [M]";
             if (shakeLabel)
                 shakeLabel.text = session.Feedback.shakeEnabled ? "Sarsıntı: Açık  [V]" : "Sarsıntı: Kapalı  [V]";
             toast.text = session.Toast;
@@ -97,7 +97,7 @@ namespace TinyWorkshop
             victoryPanel.SetActive(win);
             hint.transform.parent.gameObject.SetActive(!win);
             toast.gameObject.SetActive(!win);
-            victoryTitle.text = session.RewardClaimed ? (session.mode == WorkshopMode.MainGame ? "Atölye Uyandı!" : "ATÖLYE YENİDEN CANLANDI") : session.mode == WorkshopMode.Movement ? "GÜZEL SIÇRAYIŞ!" : "TEST TAMAMLANDI";
+            victoryTitle.text = session.RewardClaimed ? "Atölye Uyandı!" : session.mode == WorkshopMode.Movement ? "Güzel Sıçrayış!" : "Test Tamamlandı!";
             victoryText.text = session.RewardClaimed ? "Üç küçük dişli. Yeni bir başlangıç." : "Bir sonraki laboratuvara geç veya yeniden dene.";
             if (session.mode == WorkshopMode.MainGame)
             {
@@ -106,31 +106,44 @@ namespace TinyWorkshop
                 else
                     RefreshMain();
             }
-            else if (session.mode == WorkshopMode.OneButton)
+            else
+                RefreshLab();
+            FitHint();
+        }
+
+        // ---------------------------------------------------------------- lab scenes (01-03)
+        void RefreshLab()
+        {
+            float fill;
+            if (session.mode == WorkshopMode.OneButton)
             {
-                objective.text = $"ÜRETİLEN DİŞLİ   {session.Produced} / 3";
-                status.text = $"ENERJİ   {session.Machine.Energy} / {session.Machine.Settings.threshold}";
-                controls.text = "SPACE  BAS / ÜRET          1 2 3  RİTİM PROFİLİ          TAB  MENÜ";
-                hint.text = "SPACE  ·  HER ÜÇ BASIŞTA BİR DİŞLİ";
-                profileLabel.text = "RİTİM: " + new[] { "NORMAL", "SAKİN", "TELAŞLI" }[session.Machine.ProfileIndex];
+                objective.text = $"Üretilen dişli   {session.Produced} / 3";
+                status.text = $"Enerji  {session.Machine.Energy} / {session.Machine.Profile.threshold}";
+                hint.text = "SPACE  ·  Her üç basışta bir dişli";
+                profileLabel.text = "Ritim: " + new[] { "Normal", "Sakin", "Telaşlı" }[session.ProfileIndex];
+                fill = session.Produced / 3f;
             }
             else if (session.mode == WorkshopMode.Movement)
             {
-                objective.text = "ÜÇ PLATFORMU AŞ  →  YEŞİL HEDEF";
-                status.text = session.Robot.Grounded ? "ZEMİNDE" : "HAVADA";
-                controls.text = "A D  HAREKET     SPACE  ZIPLA     1 2 3  PROFİL     G  YARDIM     TAB  MENÜ";
-                hint.text = "KISA BAS: ALÇAK  ·  BASILI TUT: YÜKSEK";
-                profileLabel.text = "HİS: " + new[] { "NORMAL", "AĞIR", "HAFİF" }[session.Robot.ProfileIndex] + "   /   COYOTE + BUFFER: " + (session.Robot.assistance ? "AÇIK" : "KAPALI");
+                objective.text = "Üç platformu aş, hediyeye ulaş";
+                status.text = session.Robot.Grounded ? "Zeminde" : "Havada";
+                hint.text = "Kısa bas: alçak  ·  Basılı tut: yüksek";
+                profileLabel.text = "His: " + new[] { "Normal", "Ağır", "Hafif" }[session.ProfileIndex] + "   ·   Coyote + Buffer: " + (session.Robot.assistance ? "Açık" : "Kapalı");
+                fill = session.DemoComplete ? 1 : Mathf.InverseLerp(-8, 8, session.Robot.transform.position.x);
             }
             else
             {
-                objective.text = $"VURULAN HEDEF   {session.HitTargets} / 3";
-                status.text = session.DesignedPhysics ? "TASARLANMIŞ FİZİK" : "DOĞAL FİZİK";
-                controls.text = "SPACE  FIRLAT          T  FİZİK MODU          R  YENİDEN KUR          TAB  MENÜ";
-                hint.text = "SPACE  ·  SEKME YÜZEYİNDEN HEDEFLERE";
-                profileLabel.text = session.DesignedPhysics ? "BUMPER: TEMAS SONRASI YÖN / HIZ DÜZELTME" : "PHYSICS MATERIAL 2D: DOĞAL SEKME";
+                objective.text = $"Vurulan hedef   {session.HitTargets} / 3";
+                status.text = session.DesignedPhysics ? "Tasarlanmış fizik" : "Doğal fizik";
+                hint.text = "SPACE  ·  Sekme yüzeyinden hedeflere";
+                profileLabel.text = session.DesignedPhysics ? "Bumper: temas sonrası yön / hız düzeltme" : "Physics Material 2D: doğal sekme";
+                fill = session.HitTargets / 3f;
             }
-            FitHint();
+            if (objectiveFill)
+            {
+                shownFill = Mathf.MoveTowards(shownFill, fill, Time.unscaledDeltaTime * 2.5f);
+                SetFill(objectiveFill, shownFill);
+            }
         }
 
         // ---------------------------------------------------------------- redesigned main game HUD
@@ -238,7 +251,8 @@ namespace TinyWorkshop
             var machine = session.Machine;
             var stationTop = station.GetComponent<SpriteRenderer>() ? station.GetComponent<SpriteRenderer>().bounds.max.y + .2f : station.transform.position.y + 1.6f;
             Vector3 stationAnchor = new Vector3(station.transform.position.x, stationTop);
-            Vector3 machineAnchor = machine.buttonVisual ? machine.buttonVisual.position + Vector3.up * 2.55f : machine.transform.position + Vector3.up * 1.9f;
+            var machineLook = machine.GetComponent<MachinePresentation>();
+            Vector3 machineAnchor = machineLook && machineLook.buttonVisual ? machineLook.buttonVisual.position + Vector3.up * 2.55f : machine.transform.position + Vector3.up * 1.9f;
             Vector3 anchor;
             if (locked)
             {

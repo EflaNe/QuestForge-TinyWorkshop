@@ -1,11 +1,13 @@
 using UnityEngine;
 namespace TinyWorkshop
 {
+    // Physics lab crate: scores once when a gear touches its trigger.
     public sealed class PhysicsTarget : MonoBehaviour
     {
         public WorkshopSession session;
         public SpriteRenderer visual;
         bool scored;
+
         void OnTriggerEnter2D(Collider2D other)
         {
             if (scored || !other.attachedRigidbody || !other.attachedRigidbody.TryGetComponent<Gear>(out _))
